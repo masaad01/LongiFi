@@ -71,7 +71,7 @@ void initDashboard(){
           saveInDatabase("MOBILE_AP_PASS", password);
         }
         //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        changeAPCrdentials(ssid, password);
+        changeAPCrdentials();
       }
     }
     request->redirect("/dashboard");
@@ -95,7 +95,7 @@ void initDashboard(){
           saveInDatabase("FIXED_STA_PASS", password);
         }
         //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        changeSTACrdentials(ssid, password);
+        changeSTACrdentials();
       }
     }
     request->redirect("/dashboard");
