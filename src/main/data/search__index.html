@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LongiFi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" type="text/css" href="search__style.css">
+</head>
+
+<body>
+  <div class="topnav">
+    <h1>Search</h1>
+  </div>
+  <div class="content">
+    <div class="card-grid">
+      <div class="card">
+        <form action="/search" method="POST">
+          <input type="text" id="query" name="query" , value="%QUERY%">
+          <input type="submit" value="Search">
+        </form>
+      </div>
+      <div class="card search-results">
+        <h2>Search results</h2>
+        %RESULTS%
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
