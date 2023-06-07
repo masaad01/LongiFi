@@ -1,16 +1,17 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include <Wire.h>
+
 #if defined(HELTEC)
 
-#include <heltec.h>
-#include "Arduino.h"
-#define Display (*(Heltec.display))
+#include "Oled_Heltec/HeltecScreen.h"
+//#include "Arduino.h"
+SSD1306Wire Display(0x3c, SDA_OLED, SCL_OLED, RST_OLED, GEOMETRY_128_64);
 
 
 #elif defined(LILYGO)
 
-#include <Wire.h>
 #include <SSD1306Wire.h>
 
 SSD1306Wire Display(0x3c, SDA, SCL);
@@ -51,7 +52,7 @@ void initScreen()
 
   #if defined(HELTEC)
 	Serial.println("Initializing Heltec screen...");
-	Heltec.begin(true, false, true);
+	Display.init();
   Display.drawStringMaxWidth(0, 0, 128,"Initializing Heltec screen...");
 
   #elif defined(LILYGO)
