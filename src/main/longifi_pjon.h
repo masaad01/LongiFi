@@ -60,7 +60,10 @@ uint64_t totalPings = 0;
 uint64_t receivedPings = 0;
 String pingRole = "";
 uint64_t lastPingTimestamp = 0;
+uint64_t lastPingPktSize = 0;
 uint64_t rtt = 0;
+double datarateBytes = 0;
+
 
 void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info) {
   displayPjonStatus();
@@ -146,8 +149,10 @@ void pingHandler(String *data, int length){
       sendPjonTopicMessage(LORA_PING_TOPIC, "rep", id);
     }
     else if(pingType == "rep"){
-      if(id.toInt() == totalPings)
+      if(id.toInt() == totalPings){
         rtt = millis() - lastPingTimestamp;
+        datarateBytes = 1.0 * lastPingPktSize / rtt / 2.0;
+      }
     }
     receivedPings++;
     if(pingRole == "rep"){
@@ -162,7 +167,7 @@ void loopPjon() {
 	pjonLora.update();
 }
 
-// sends a PJON packet with JSON payload {"e":"", "d1":"", "d2":"", "d3":""}
+// sends a PJON packet with JSON payload {"e":"", "d1":"", "d2":"", "d3":""} returns PJON packet payload length
 int sendPjonTopicMessage(String topicName, String data1, String data2, String data3){
   StaticJsonDocument<255> doc;
   doc["e"] = topicName;
@@ -236,10 +241,19 @@ String getLastConnectionTime(){
   return String((millis() - lastConnectionTimestamp) / 1000);
 }
 
+String getStringDatarate(double datarateBytes){
+  String unit = "Bps";
+  if(datarateBytes > 1000){
+    datarateBytes /= 1000;
+    unit = "KBps";
+  }
+  return String(datarateBytes, 2) + unit;
+}
+
 void displayPjonStatus(){
   String s = "";
   s += String(pjonLora.strategy.packetRssi()) + "dB ";
-  
+  s += getStringDatarate(datarateBytes) + " ";
   s += "Ping: " + String(receivedPings) + "/" + String(totalPings);
   displayOnLoraPart(s);
 }
@@ -247,7 +261,7 @@ void displayPjonStatus(){
 void sendPingPeriodically(int periodInMillis){
   if(pingRole == "req" && millis() - lastPingTimestamp > periodInMillis){
     Serial.println("pinging...");
-    sendPjonTopicMessage(LORA_PING_TOPIC, "req", String(totalPings));
+    lastPingPktSize = sendPjonTopicMessage(LORA_PING_TOPIC, "req", String(totalPings));
     totalPings++;  
     lastPingTimestamp = millis();
     displayPjonStatus();
