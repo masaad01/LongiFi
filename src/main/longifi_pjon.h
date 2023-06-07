@@ -229,8 +229,8 @@ String getLastConnectionTime(){
 
 void displayPjonStatus(){
   String s = "";
-  s += String(pjonLora.strategy.packetRssi()) + "  ";
-  s += String(receivedPings) + "/" + String(totalPings);
+  s +=  "RSSI = " + String(pjonLora.strategy.packetRssi()) + "  ";
+  s += "Ping: received/sent  " + String(receivedPings) + "/" + String(totalPings);
   displayOnLoraPart(s);
 }
 
