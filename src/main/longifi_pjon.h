@@ -15,9 +15,9 @@
 #include <PJONThroughLora.h>
 
 #define LORA_FREQUENCY				868000000UL
-#define LORA_BANDWIDTH				31.25E3 //Supported values are 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3, 500E3
-#define LORA_SPREADING_FACTOR		10   //Supported values are between 6 and 12. If a spreading factor of 6 is set, implicit header mode must be used to transmit and receive packets
-#define LORA_TX_POWER         20
+//#define LORA_BANDWIDTH				125E3 //Supported values are 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3, 500E3
+//#define LORA_SPREADING_FACTOR		7   //Supported values are between 6 and 12. If a spreading factor of 6 is set, implicit header mode must be used to transmit and receive packets
+//#define LORA_TX_POWER         20
 #define LORA_CODING_RATE			5     //Supported values are between 5 and 8, these correspond to coding rates of 4/5 and 4/8
 #define LORA_SYNC_WORD				0x12
 
@@ -99,9 +99,9 @@ void initPjon() {
 	// Obligatory to initialize Radio with correct frequency
 	pjonLora.strategy.setFrequency(LORA_FREQUENCY);
 	// Optional
-	pjonLora.strategy.setSignalBandwidth(LORA_BANDWIDTH);
-	pjonLora.strategy.setSpreadingFactor(LORA_SPREADING_FACTOR);
-  // pjonLora.strategy.setTxPower(LORA_TX_POWER);
+	pjonLora.strategy.setSignalBandwidth(getFromDatabase("LORA_BANDWIDTH").toInt());
+	pjonLora.strategy.setSpreadingFactor(getFromDatabase("LORA_SPREADING_FACTOR").toInt());
+  // pjonLora.strategy.setTxPower(getFromDatabase("LORA_TX_POWER").toInt());
 	pjonLora.strategy.setCodingRate4(LORA_CODING_RATE);
 	pjonLora.strategy.setSyncWord(LORA_SYNC_WORD);
 
