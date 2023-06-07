@@ -8,7 +8,6 @@
 
 #define DATABASE_MAX_SIZE  50 * 1024 // 50kB
 #define DATABASE_FILE_PATH  "/config.json"
-#define DATABASE_SAVE_PERIOD  1000 // save database to storage every 1 second
 // #define DATABASE_TMP_PATH  "/tmp.jsonl"
 
 DynamicJsonDocument memoryDatabase(DATABASE_MAX_SIZE);
@@ -50,20 +49,20 @@ void readDatabase(){
   }
 }
 
-void saveDatabasePeriodically(int periodInMillis){
-  static uint64_t lastSaved = 0;
-  if(isDatabaseChanged && millis() - lastSaved > periodInMillis){
-    saveDatabase();
-    lastSaved = millis();
-  }
-}
+//void saveDatabasePeriodically(int periodInMillis){
+//  static uint64_t lastSaved = 0;
+//  if(isDatabaseChanged && millis() - lastSaved > periodInMillis){
+//    saveDatabase();
+//    lastSaved = millis();
+//  }
+//}
 
 void initDatabase(){
   readDatabase();
 }
 
 void loopDatabase(){
-  saveDatabasePeriodically(DATABASE_SAVE_PERIOD);
+//  saveDatabasePeriodically(DATABASE_SAVE_PERIOD);
 }
 
 bool isKeyArray(const String& key) {
@@ -79,6 +78,7 @@ bool saveInDatabase(const String& key, const String& value) {
   if (memoryDatabase[key] != value) {
     memoryDatabase[key] = value;
     isDatabaseChanged = true;
+    saveDatabase();
     return true;
   }
 
@@ -157,6 +157,7 @@ bool removeFromArray(const String& key, int index = -1) {
   if (index >= 0 && index < arr.size()) {
     arr.remove(index);
     isDatabaseChanged = true;
+    saveDatabase();
     return true;
   }
 
