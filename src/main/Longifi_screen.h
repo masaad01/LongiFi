@@ -5,7 +5,7 @@
 
 #if defined(HELTEC)
 
-#include "Oled_Heltec/HeltecScreen.h"
+#include "HeltecScreen.h"
 //#include "Arduino.h"
 SSD1306Wire Display(0x3c, SDA_OLED, SCL_OLED, RST_OLED, GEOMETRY_128_64);
 
@@ -39,7 +39,7 @@ void displayAll(){
   delay(1000);
 }
 
-void displayOnWIFIPart(String string1="",String string2="",String string3="",String string4=""){
+void displayOnWifiPart(String string1="",String string2="",String string3="",String string4=""){
   wifiStrings[0]=string1;
   wifiStrings[1]=string2;
   wifiStrings[2]=string3;
@@ -68,7 +68,7 @@ void initScreen()
 }
 
 
-void displayOnLoRaPart(String status){
+void displayOnLoraPart(String status){
   loraString=status;
   displayAll();
 }
