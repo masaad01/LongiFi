@@ -36,13 +36,24 @@ void initWifi() {
 void workAsFixedSTA(String ssid,String password) {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  int remainingTime =30;
   Serial.print("Connecting to WiFi ..");
   while (WiFi.status() != WL_CONNECTED) {
+ 
+
       delay(500);
+      remainingTime--;
+      if(remainingTime==0)
+      break;
       Serial.print(".");
   }
+  if(WiFi.status() != WL_CONNECTED){
+    Serial.println();
+  displayOnWifiPart("Failed to Connect....");
+  Serial.println("Failed to Connect....");}
 
-  displayCrdentials();
+  else{
+  displayCrdentials();}
 }
 void workAsMobileAP(String ssid,String password){
     WiFi.mode(WIFI_AP);
