@@ -23,6 +23,24 @@
 #define LORA_SYNC_WORD				0x12
 
 
+void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info);
+void error_handler(uint8_t code, uint16_t data, void *custom_pointer);
+void initPjon();
+void pingHandler(String *data, int length);
+void loopPjon();
+int sendPjonTopicMessage(String topicName, String data1, String data2 = "", String data3 = "");
+int addPjonReceiveTopicListener(String topicName, void (*callback)(String *data, int length));
+bool removePjonReceiveTopicListener(int id);
+String getLoraRssi();
+String getTotalPacketsSent();
+String getTotalPacketsReceived();
+String getTotalPacketsQueued();
+String getLastConnectionTime();
+void displayPjonStatus();
+void sendPingPeriodically(int periodInMillis);
+
+
+
 PJONThroughLora pjonLora(255);
 
 struct PjonReceiveTopicListener{
@@ -41,24 +59,8 @@ uint64_t lastConnectionTimestamp = 0;
 uint64_t totalPings = 0;
 uint64_t receivedPings = 0;
 String pingRole = "";
-
-void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info);
-void error_handler(uint8_t code, uint16_t data, void *custom_pointer);
-void initPjon();
-void pingHandler(String *data, int length);
-void loopPjon();
-void sendPjonTopicMessage(String topicName, String data1, String data2 = "", String data3 = "");
-int addPjonReceiveTopicListener(String topicName, void (*callback)(String *data, int length));
-bool removePjonReceiveTopicListener(int id);
-String getLoraRssi();
-String getTotalPacketsSent();
-String getTotalPacketsReceived();
-String getTotalPacketsQueued();
-String getLastConnectionTime();
-void displayPjonStatus();
-void sendPingPeriodically(int periodInMillis);
-
-
+uint64_t lastPingTimestamp = 0;
+uint64_t rtt = 0;
 
 void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info) {
   displayPjonStatus();
@@ -143,9 +145,15 @@ void pingHandler(String *data, int length){
     if(pingType == "req"){
       sendPjonTopicMessage(LORA_PING_TOPIC, "rep", id);
     }
+    else if(pingType == "rep"){
+      if(id.toInt() == totalPings)
+        rtt = millis() - lastPingTimestamp;
+    }
     receivedPings++;
-    if(pingRole == "rep")
+    if(pingRole == "rep"){
       totalPings = id.toInt();
+    }
+    displayPjonStatus();
 }
 
 void loopPjon() {
@@ -155,7 +163,7 @@ void loopPjon() {
 }
 
 // sends a PJON packet with JSON payload {"e":"", "d1":"", "d2":"", "d3":""}
-void sendPjonTopicMessage(String topicName, String data1, String data2, String data3){
+int sendPjonTopicMessage(String topicName, String data1, String data2, String data3){
   StaticJsonDocument<255> doc;
   doc["e"] = topicName;
   doc["d"] = data1;
@@ -171,6 +179,7 @@ void sendPjonTopicMessage(String topicName, String data1, String data2, String d
   pjonLora.send(PJON_REMOTE_ADDRESS, jsonStr.c_str(), jsonStr.length());
   totalPacketsSent++;
   lastConnectionTimestamp = millis(); //TODO: make update on actual send instead of on the call
+  return jsonStr.length();
 }
 
 // returns the id of the topicListener
@@ -229,18 +238,18 @@ String getLastConnectionTime(){
 
 void displayPjonStatus(){
   String s = "";
-  s +=  "RSSI: " + String(pjonLora.strategy.packetRssi()) + "  ";
+  s += String(pjonLora.strategy.packetRssi()) + "dB ";
+  
   s += "Ping: " + String(receivedPings) + "/" + String(totalPings);
   displayOnLoraPart(s);
 }
 
 void sendPingPeriodically(int periodInMillis){
-  static uint64_t lastSent = 0;
-  if(pingRole == "req" && millis() - lastSent > periodInMillis){
+  if(pingRole == "req" && millis() - lastPingTimestamp > periodInMillis){
     Serial.println("pinging...");
     sendPjonTopicMessage(LORA_PING_TOPIC, "req", String(totalPings));
     totalPings++;  
-    lastSent = millis();
+    lastPingTimestamp = millis();
     displayPjonStatus();
   }
 }
