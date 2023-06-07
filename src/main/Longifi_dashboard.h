@@ -47,10 +47,13 @@ void initDashboard(){
   
   server.serveStatic(DASHBOARD_URL_PATH, Storage, DASHBOARD_STORAGE_PATH);
   
-  server.on(DASHBOARD_URL_PATH, HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/dashboard", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(Storage, String(DASHBOARD_STORAGE_PATH)+ DASHBOARD_DEFAULT_FILE, String(), false, dashboardProcessor);
   });
 
+  server.on("/dashboard/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(Storage, String(DASHBOARD_STORAGE_PATH)+ "style.css");
+  });
   // addPjonReceiveTopicListener(CHAT_APP_PJON_TOPIC, handlePjonChatAppMessage);
   
   server.on("/dashboard/ap", HTTP_POST, [](AsyncWebServerRequest *request) {
@@ -70,6 +73,7 @@ void initDashboard(){
           password = p->value().c_str();
           saveInDatabase("MOBILE_AP_PASS", password);
         }
+        saveInDatabase("ACTIVE_MODE","MOBILE_AP");
         //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
       }
     }
@@ -94,6 +98,7 @@ void initDashboard(){
           password = p->value().c_str();
           saveInDatabase("FIXED_STA_PASS", password);
         }
+        saveInDatabase("ACTIVE_MODE","FIXED_STA");
         //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
       }
     }

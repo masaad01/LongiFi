@@ -4,6 +4,7 @@
 #include "Longifi_pin_util.h"
 #include "Longifi_pjon_utils.h"
 #include "Longifi_storage.h"
+#include "Longifi_screen.h"
 
 #ifndef ArduinoJson
 #include <ArduinoJson.h>
@@ -21,6 +22,7 @@
 #define LORA_CODING_RATE			5     //Supported values are between 5 and 8, these correspond to coding rates of 4/5 and 4/8
 #define LORA_SYNC_WORD				0x12
 
+
 PJONThroughLora pjonLora(255);
 
 struct PjonReceiveTopicListener{
@@ -36,7 +38,30 @@ uint64_t totalPacketsSent = 0;
 uint64_t totalPacketsReceived = 0;
 uint64_t lastConnectionTimestamp = 0;
 
+uint64_t totalPings = 0;
+uint64_t receivedPings = 0;
+String pingRole = "";
+
+void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info);
+void error_handler(uint8_t code, uint16_t data, void *custom_pointer);
+void initPjon();
+void pingHandler(String *data, int length);
+void loopPjon();
+void sendPjonTopicMessage(String topicName, String data1, String data2 = "", String data3 = "");
+int addPjonReceiveTopicListener(String topicName, void (*callback)(String *data, int length));
+bool removePjonReceiveTopicListener(int id);
+String getLoraRssi();
+String getTotalPacketsSent();
+String getTotalPacketsReceived();
+String getTotalPacketsQueued();
+String getLastConnectionTime();
+void displayPjonStatus();
+void sendPingPeriodically(int periodInMillis);
+
+
+
 void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info) {
+  displayPjonStatus();
   totalPacketsReceived++;
   lastConnectionTimestamp = millis();
   payload[length] = '\0'; // put a null at the end to terminate the string
@@ -107,15 +132,30 @@ void initPjon() {
 
 	pjonLora.begin();
 
+  addPjonReceiveTopicListener(LORA_PING_TOPIC, pingHandler);
+
+  pingRole = getFromDatabase("ACTIVE_MODE") == "FIXED_STA"? "req" : "rep";    
+}
+
+void pingHandler(String *data, int length){
+    String pingType = data[0];
+    String id = data[1];
+    if(pingType == "req"){
+      sendPjonTopicMessage(LORA_PING_TOPIC, "rep", id);
+    }
+    receivedPings++;
+    if(pingRole == "rep")
+      totalPings = id.toInt();
 }
 
 void loopPjon() {
+  sendPingPeriodically(10000);
 	pjonLora.receive(20000); //receive for 20 ms
 	pjonLora.update();
 }
 
 // sends a PJON packet with JSON payload {"e":"", "d1":"", "d2":"", "d3":""}
-void sendPjonTopicMessage(String topicName, String data1, String data2 = "", String data3 = ""){
+void sendPjonTopicMessage(String topicName, String data1, String data2, String data3){
   StaticJsonDocument<255> doc;
   doc["e"] = topicName;
   doc["d"] = data1;
@@ -188,7 +228,21 @@ String getLastConnectionTime(){
 }
 
 void displayPjonStatus(){
-  
+  String s = "";
+  s += String(pjonLora.strategy.packetRssi()) + "  ";
+  s += String(receivedPings) + "/" + String(totalPings);
+  displayOnLoraPart(s);
+}
+
+void sendPingPeriodically(int periodInMillis){
+  static uint64_t lastSent = 0;
+  if(pingRole == "req" && millis() - lastSent > periodInMillis){
+    Serial.println("pinging...");
+    sendPjonTopicMessage(LORA_PING_TOPIC, "req", String(totalPings));
+    totalPings++;  
+    lastSent = millis();
+    displayPjonStatus();
+  }
 }
 
 #endif

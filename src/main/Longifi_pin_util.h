@@ -32,7 +32,7 @@
 
 #define ADC_PIN                    35
 
-#define HAS_SDCARD
+//#define HAS_SDCARD
 #define HAS_DISPLAY
 #elif defined(HELTEC)
 #define I2C_SDA                    4

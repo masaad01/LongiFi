@@ -2,6 +2,9 @@
 #define LONGIFI_PJON_UTILS_H
 
 
+#define LORA_PING_TOPIC "ping"
+
+
 #if defined(FIXED_STA)
 #define PJON_LOCAL_ADDRESS    10  // 255 -> unassigned, 0 -> broadcast
 #define PJON_REMOTE_ADDRESS   20
