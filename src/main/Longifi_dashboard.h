@@ -71,10 +71,10 @@ void initDashboard(){
           saveInDatabase("MOBILE_AP_PASS", password);
         }
         //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        changeAPCrdentials();
       }
     }
     request->redirect("/dashboard");
+    changeAPCrdentials();
   });
   
   server.on("/dashboard/sta", HTTP_POST, [](AsyncWebServerRequest *request) {
@@ -95,10 +95,10 @@ void initDashboard(){
           saveInDatabase("FIXED_STA_PASS", password);
         }
         //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        changeSTACrdentials();
       }
     }
     request->redirect("/dashboard");
+    changeSTACrdentials();
   });
 }
 
