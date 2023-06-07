@@ -64,15 +64,15 @@ void displayCrdentials()
 {
 
   if( getActiveMode() == "FIXED_STA"){
-    displayOnWIFIPart("Connect Succeed!");
-    displayOnWIFIPart("STA_IP:" + WiFi.localIP().toString());
+    displayOnWifiPart("Connect Succeed!");
+    displayOnWifiPart("STA_IP:" + WiFi.localIP().toString());
   }
   else {
     //APssid = getFromDatabase("MOBILE_AP_SSID");
     //APpass = getFromDatabase("MOBILE_AP_PASS");
-    displayOnWIFIPart("Creating AP...");
-    displayOnWIFIPart("AP created...");
-    displayOnWIFIPart(("SSID: " + APssid),("PASS: " + APpass),"IP: "+ WiFi.softAPIP().toString());
+    displayOnWifiPart("Creating AP...");
+    displayOnWifiPart("AP created...");
+    displayOnWifiPart(("SSID: " + APssid),("PASS: " + APpass),"IP: "+ WiFi.softAPIP().toString());
     
   }
 }

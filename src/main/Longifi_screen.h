@@ -18,9 +18,9 @@ SSD1306Wire Display(0x3c, SDA, SCL);
 
 #endif
 
-void displayOnWIFIPart();
+void displayOnWifiPart();
 void displayCrdentials();
-void displayOnLoRaPart(String status);
+void displayOnLoraPart(String status);
 
 String wifiStrings[4];
 String loraString = "LoRa Area";
@@ -76,7 +76,7 @@ void displayOnLoraPart(String status){
 
 void loopScreen()
 {
-  displayOnLoRaPart("LoRa Area");
+  displayOnLoraPart("LoRa Area");
 }
 #endif
 
