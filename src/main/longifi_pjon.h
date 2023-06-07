@@ -149,8 +149,8 @@ void pingHandler(String *data, int length){
       sendPjonTopicMessage(LORA_PING_TOPIC, "rep", id);
     }
     else if(pingType == "rep"){
-      if(id.toInt() == totalPings){
-        rtt = millis() - lastPingTimestamp;
+      if(id.toInt() == totalPings - 1){
+        rtt = (millis() - lastPingTimestamp) / 1000.0;
         datarateBytes = 1.0 * lastPingPktSize / rtt / 2.0;
       }
     }
@@ -247,7 +247,7 @@ String getStringDatarate(double datarateBytes){
     datarateBytes /= 1000;
     unit = "KBps";
   }
-  return String(datarateBytes, 2) + unit;
+  return String(datarateBytes, 1) + unit;
 }
 
 void displayPjonStatus(){
@@ -262,7 +262,7 @@ void sendPingPeriodically(int periodInMillis){
   if(pingRole == "req" && millis() - lastPingTimestamp > periodInMillis){
     Serial.println("pinging...");
     lastPingPktSize = sendPjonTopicMessage(LORA_PING_TOPIC, "req", String(totalPings));
-    totalPings++;  
+    totalPings++;
     lastPingTimestamp = millis();
     displayPjonStatus();
   }
